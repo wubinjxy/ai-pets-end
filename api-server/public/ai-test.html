@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 模型测试</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        form {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            width: 100%;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-height: 100px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+            display: none;
+        }
+        .chat-history {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .chat-message {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .user {
+            background-color: #e3f2fd;
+            text-align: right;
+        }
+        .assistant {
+            background-color: #f1f8e9;
+        }
+        .system {
+            background-color: #fff3e0;
+            font-style: italic;
+        }
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .options > div {
+            flex: 1 1 calc(50% - 10px);
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI 大模型测试界面</h1>
+    
+    <div class="tabs">
+        <div class="tab active" data-tab="completion">文本生成</div>
+        <div class="tab" data-tab="chat">对话</div>
+    </div>
+    
+    <div id="completion" class="tab-content active">
+        <h2>文本生成</h2>
+        <form id="completionForm">
+            <label for="prompt">输入提示词:</label>
+            <textarea id="prompt" name="prompt" placeholder="请输入你想要AI完成的提示词..." required></textarea>
+            
+            <div class="options">
+                <div>
+                    <label for="completionProvider">AI 提供商:</label>
+                    <select id="completionProvider" name="provider">
+                        <option value="openai">OpenAI</option>
+                        <option value="bailian">阿里云百炼</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="completionModel">模型:</label>
+                    <input type="text" id="completionModel" name="model" placeholder="留空使用默认模型">
+                </div>
+                
+                <div>
+                    <label for="completionMaxTokens">最大令牌数:</label>
+                    <input type="number" id="completionMaxTokens" name="maxTokens" min="1" max="4000" value="500">
+                </div>
+                
+                <div>
+                    <label for="completionTemperature">温度:</label>
+                    <input type="number" id="completionTemperature" name="temperature" min="0" max="2" step="0.1" value="0.7">
+                </div>
+            </div>
+            
+            <button type="submit">生成</button>
+        </form>
+    </div>
+    
+    <div id="chat" class="tab-content">
+        <h2>对话</h2>
+        
+        <div class="chat-history" id="chatHistory">
+            <div class="chat-message system">系统：开始新的对话...</div>
+        </div>
+        
+        <form id="chatForm">
+            <label for="userMessage">你的消息:</label>
+            <textarea id="userMessage" name="content" placeholder="输入你想说的内容..." required></textarea>
+            
+            <div class="options">
+                <div>
+                    <label for="chatProvider">AI 提供商:</label>
+                    <select id="chatProvider" name="provider">
+                        <option value="openai">OpenAI</option>
+                        <option value="bailian">阿里云百炼</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="chatModel">模型:</label>
+                    <input type="text" id="chatModel" name="model" placeholder="留空使用默认模型">
+                </div>
+                
+                <div>
+                    <label for="chatMaxTokens">最大令牌数:</label>
+                    <input type="number" id="chatMaxTokens" name="maxTokens" min="1" max="4000" value="500">
+                </div>
+                
+                <div>
+                    <label for="chatTemperature">温度:</label>
+                    <input type="number" id="chatTemperature" name="temperature" min="0" max="2" step="0.1" value="0.7">
+                </div>
+            </div>
+            
+            <button type="submit">发送</button>
+            <button type="button" id="resetChat">重置对话</button>
+        </form>
+    </div>
+    
+    <div id="result"></div>
+    
+    <script>
+        // 切换选项卡
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // 文本生成表单提交
+        const completionForm = document.getElementById('completionForm');
+        const resultDiv = document.getElementById('result');
+        
+        completionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(completionForm);
+            const data = Object.fromEntries(formData.entries());
+            
+            // 转换数字类型
+            if (data.maxTokens) data.maxTokens = parseInt(data.maxTokens);
+            if (data.temperature) data.temperature = parseFloat(data.temperature);
+            
+            try {
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = '正在生成...';
+                
+                const response = await fetch('http://localhost:3000/ai/completion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`请求失败: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                resultDiv.innerHTML = `
+                <h3>生成结果:</h3>
+                <p>${result.text.replace(/\n/g, '<br>')}</p>
+                <hr>
+                <p><strong>模型:</strong> ${result.model || '未知'}</p>
+                <p><strong>提供商:</strong> ${result.provider}</p>
+                ${result.usage ? `
+                <p><strong>提示词令牌:</strong> ${result.usage.promptTokens || 0}</p>
+                <p><strong>生成令牌:</strong> ${result.usage.completionTokens || 0}</p>
+                <p><strong>总令牌:</strong> ${result.usage.totalTokens || 0}</p>
+                ` : ''}
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">错误: ${error.message}</p>`;
+            }
+        });
+        
+        // 对话历史和状态
+        let chatMessages = [
+            { role: 'system', content: '你是一个有用的AI助手。' }
+        ];
+        
+        // 对话表单提交
+        const chatForm = document.getElementById('chatForm');
+        const chatHistory = document.getElementById('chatHistory');
+        
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userMessageInput = document.getElementById('userMessage');
+            const userMessage = userMessageInput.value.trim();
+            
+            if (!userMessage) return;
+            
+            // 添加用户消息到历史
+            chatMessages.push({ role: 'user', content: userMessage });
+            
+            // 更新聊天界面
+            renderChatMessage('user', userMessage);
+            userMessageInput.value = '';
+            
+            // 准备请求数据
+            const formData = new FormData(chatForm);
+            const requestData = {
+                messages: chatMessages,
+                model: formData.get('model') || undefined,
+                maxTokens: parseInt(formData.get('maxTokens')) || undefined,
+                temperature: parseFloat(formData.get('temperature')) || undefined,
+                provider: formData.get('provider'),
+            };
+            
+            try {
+                // 显示等待状态
+                renderChatMessage('system', '正在思考...');
+                
+                const response = await fetch('http://localhost:3000/ai/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`请求失败: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // 移除等待状态消息
+                chatHistory.removeChild(chatHistory.lastChild);
+                
+                // 添加助手回复到历史
+                chatMessages.push({ 
+                    role: result.message.role, 
+                    content: result.message.content 
+                });
+                
+                // 更新聊天界面
+                renderChatMessage('assistant', result.message.content);
+                
+                // 显示使用情况
+                if (result.usage) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                    <h3>使用情况:</h3>
+                    <p><strong>模型:</strong> ${result.model || '未知'}</p>
+                    <p><strong>提供商:</strong> ${result.provider}</p>
+                    <p><strong>提示词令牌:</strong> ${result.usage.promptTokens || 0}</p>
+                    <p><strong>生成令牌:</strong> ${result.usage.completionTokens || 0}</p>
+                    <p><strong>总令牌:</strong> ${result.usage.totalTokens || 0}</p>
+                    `;
+                }
+            } catch (error) {
+                // 移除等待状态消息
+                if (chatHistory.lastChild.classList.contains('system')) {
+                    chatHistory.removeChild(chatHistory.lastChild);
+                }
+                
+                renderChatMessage('system', `错误: ${error.message}`);
+            }
+        });
+        
+        // 重置对话
+        document.getElementById('resetChat').addEventListener('click', () => {
+            chatMessages = [
+                { role: 'system', content: '你是一个有用的AI助手。' }
+            ];
+            chatHistory.innerHTML = '<div class="chat-message system">系统：开始新的对话...</div>';
+            resultDiv.style.display = 'none';
+        });
+        
+        // 渲染聊天消息
+        function renderChatMessage(role, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message', role);
+            
+            // 添加发送者标签
+            let sender = '';
+            switch (role) {
+                case 'user': sender = '你: '; break;
+                case 'assistant': sender = 'AI: '; break;
+                case 'system': sender = '系统: '; break;
+            }
+            
+            messageDiv.textContent = sender + content;
+            chatHistory.appendChild(messageDiv);
+            
+            // 滚动到底部
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+    </script>
+</body>
+</html> 
